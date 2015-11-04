@@ -20,5 +20,4 @@ php encdec.php dec
 There is a $settings variable inside the encdec.php file.
 
 ##Thanks to:
-Lea Krämer
-Lidia Del Rio
+Lea Krämer & Lidia Del Rio
