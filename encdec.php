@@ -38,7 +38,7 @@ class Encdec {
       'decDir'           => 'dec/',
       'decFile'          => 'dec',
       'sendUrl'          => 'insert-url.here',
-      'addMax'           => 999, // must be higher than any sum
+      'addMax'           => 444, // must be higher than any possible sum
       'defaultKeyLength' => 255
     ];
   }
@@ -110,10 +110,7 @@ class Encdec {
     $keyUnit = 0;
     $keyLength = count($key);
     foreach ($string as $k => $char) {
-      $num = ord($char) + ord($key[$keyUnit]);
-      if($num <= self::$settings->addMax) {
-        $num = abs($num - self::$settings->addMax);
-      }
+      $num = abs((ord($char) + ord($key[$keyUnit])) - self::$settings->addMax);
       $secretString .= chr($num);
       $keyUnit++;
       if ($keyUnit == $keyLength) {
@@ -130,12 +127,7 @@ class Encdec {
     $keyUnit = 0;
     $keyLength = count($key);
     foreach ($string as $k => $char) {
-      $num = ord($char);
-      if ($num <= self::$settings->addMax) {
-        $num = abs($num - self::$settings->addMax) - ord($key[$keyUnit]);
-      } else {
-        $num -= ord($key[$keyUnit]);
-      }
+      $num = abs(ord($char) - self::$settings->addMax) - ord($key[$keyUnit]);
       $message .= chr($num);
       $keyUnit++;
       if($keyUnit == $keyLength){
