@@ -1,5 +1,4 @@
 <?php
-system('clear');
 
 if (!isset($argv[1])) {
   die("no argument given\n");
@@ -11,7 +10,6 @@ if ($argv[1] == "key") {
   $key = Encdec::generateKey();
   echo "Generated key:\n";
   echo $key;
-  echo "\n";
   $pathName = Encdec::$settings->keyDir.Encdec::$settings->keyFile;
   if(!file_exists($pathName)){
     Encdec::saveFile($pathName, $key);
@@ -19,14 +17,12 @@ if ($argv[1] == "key") {
   }else{
     echo "Could not save file. File already exists.";
   }
-  echo "\n";
 } else if ($argv[1] == "enc") {
-  echo Encdec::encryptProcess();
-  echo "\n";
+  Encdec::encryptProcess();
 } else if ($argv[1] == "dec") {
-  echo Encdec::decryptProcess();
-  echo "\n";
+  Encdec::decryptProcess();
 }
+echo "\n";
 
 class Encdec {
   public static $settings;
@@ -41,8 +37,8 @@ class Encdec {
       'encFile'          => 'enc',
       'decDir'           => 'dec/',
       'decFile'          => 'dec',
-      'sendUrl'          => 'http://zyrup.kochab.uberspace.de/exec-share/index.php',
-      'addMax'           => 112,
+      'sendUrl'          => 'insert-url.here',
+      'addMax'           => 999, // must be higher than any sum
       'defaultKeyLength' => 255
     ];
   }
@@ -77,7 +73,6 @@ class Encdec {
               'string' => $fileData
             ];
             $listDir[] = $fileData;
-            // $listDir[] = $sub;
           } elseif(is_dir($dir."/".$sub)) {
             $fileData = (object) [
               'fileName' => $sub,
