@@ -42,10 +42,55 @@ class Encdec {
 			'decDir'           => 'dec/',
 			'decFile'          => 'dec',
 			'sendUrl'          => 'insert-url.here',
-			'addMax'			     => 112,
+			'addMax'           => 112,
 			'defaultKeyLength' => 255
 		];
 	}
+
+	public static function readFileAndDirectoryArray($array, $dir) {
+		$subFiles = array();
+		foreach ($array as $k => $sub) {
+			$pathName = $dir.$sub->fileName;
+			if ($sub->string) {
+				self::saveFile($pathName, $sub->string);
+			} else if ($sub->files) {
+				$pathName = $pathName."/";
+				if (!file_exists($pathName)) {
+					mkdir($pathName);
+				}
+				$subFiles = $sub->files;
+				self::readFileAndDirectoryArray($subFiles, $pathName);
+			}
+		}
+  }
+
+  public static function readFileAndDirectory($dir) {
+		// http://www.php.net/manual/en/function.readdir.php#87733
+    $listDir = array();
+    if ($handler = opendir($dir)) {
+      while (($sub = readdir($handler)) !== false) {
+        if ($sub != "." && $sub != ".." && $sub != ".DS_Store") {
+          if (is_file($dir."/".$sub)) {
+            $fileData = file_get_contents($dir."/".$sub);
+            $fileData = (object) [
+            	'fileName' => $sub,
+            	'string' => $fileData
+            ];
+            $listDir[] = $fileData;
+            // $listDir[] = $sub;
+          } elseif(is_dir($dir."/".$sub)) {
+          	$fileData = (object) [
+          		'fileName' => $sub,
+          		'files' => self::readFileAndDirectory($dir."/".$sub)
+          	];
+          	$listDir[$sub] = $fileData;
+          }
+        }
+      }
+      closedir($handler);
+    }
+    return $listDir;
+  }
 
 	public static function saveFile($path, $data) {
 		$file = fopen($path, "w") or die("Unable to open file");
@@ -54,7 +99,7 @@ class Encdec {
 	}
 
 	public static function generateKey() {
-		// $keyLength = length of to-encrypt datastring would be very high security
+		// $keyLength = length of to-encrypt datastring would be high security
 		$keyLength = self::$settings->defaultKeyLength;
 		$key = "";
 		for ($i = 0; $i<$keyLength; $i++) {
@@ -69,14 +114,14 @@ class Encdec {
 		$secretString = "";
 		$keyUnit = 0;
 		$keyLength = count($key);
-		foreach($string as $k => $char){
+		foreach ($string as $k => $char) {
 			$num = ord($char) + ord($key[$keyUnit]);
 			if($num <= self::$settings->addMax) {
 				$num = abs($num - self::$settings->addMax);
 			}
 			$secretString .= chr($num);
 			$keyUnit++;
-			if($keyUnit == $keyLength){
+			if ($keyUnit == $keyLength) {
 				$keyUnit = 0;
 			}
 		}
@@ -89,11 +134,11 @@ class Encdec {
 		$message = "";
 		$keyUnit = 0;
 		$keyLength = count($key);
-		foreach($string as $k => $char){
+		foreach ($string as $k => $char) {
 			$num = ord($char);
-			if($num <= self::$settings->addMax) {
+			if ($num <= self::$settings->addMax) {
 				$num = abs($num - self::$settings->addMax) - ord($key[$keyUnit]);
-			}else{
+			} else {
 				$num -= ord($key[$keyUnit]);
 			}
 			$message .= chr($num);
@@ -109,9 +154,9 @@ class Encdec {
 
 		// get key
 		$keyPathName = self::$settings->keyDir.self::$settings->keyFile;
-		if(file_exists($keyPathName)){
+		if (file_exists($keyPathName)) {
 			$key = file_get_contents($keyPathName);
-		}else{
+		} else {
 			$key = self::generateKey();
 			self::saveFile($keyPathName, $key);
 			echo "Key generated and saved as '".$keyPathName."'";
@@ -122,23 +167,10 @@ class Encdec {
 		if (!file_exists($dataDir)) {
 			die("Path " . $dataDir . " does not exist\n");
 		}
-		$files = scandir($dataDir);
-		$files = array_slice($files, 2); // remove . & ..
-		$toEncrypt = array();
-		foreach ($files as $k => $file) {
-			if ($file[0] == ".") {
-				// can't put in json format
-				continue;
-			}
-			$fileData = file_get_contents($dataDir.$file);
-			$fileData = (object) [
-				'fileName' => $file,
-				'string' => $fileData
-			];
-			array_push($toEncrypt, $fileData);
-		}
-		$toEncrypt = json_encode($toEncrypt);
-		$encryptedString = self::encrypt($toEncrypt, $key);
+		$dataDir = rtrim($dataDir, "/");
+		$files = self::readFileAndDirectory($dataDir);
+		$files = json_encode($files);
+		$encryptedString = self::encrypt($files, $key);
 
 		// options
 		if (self::$settings->encTask == "save") {
@@ -150,7 +182,7 @@ class Encdec {
 			$pathName = $pathName.self::$settings->encFile;
 			self::saveFile($pathName, $encryptedString);
 
-		}else if (self::$settings->encTask == "send") {
+		} else if (self::$settings->encTask == "send") {
 			// send file with POST
 			// post max size default 2MB?
 			$toSend = 'data='.$encryptedStrings;
@@ -178,14 +210,13 @@ class Encdec {
 			die("Path " . $pathName . " does not exist\n");
 		}
 
-		$toDecrypt = json_decode(self::decrypt(file_get_contents($stringPathName), $key));
-		if(empty($toDecrypt)){
+		$files = json_decode(self::decrypt(file_get_contents($stringPathName), $key));
+
+		if (empty($files)) {
 			die("No data to decrypt avaiable.\n");
 		}
-		foreach($toDecrypt as $k => $file){
-			$pathName = $pathName.$file->fileName;
-			self::saveFile($pathName, $file->string);
-		}
+
+		self::readFileAndDirectoryArray($files, $pathName);
 
 		echo "Decryption done.";
 	}
