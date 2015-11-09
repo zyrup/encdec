@@ -1,7 +1,9 @@
 # encdec
-Simple cryptography script in PHP. Partially adapted one-time pad encryption. Made and tested on OS X El Capitan.
+Simple cryptography script in PHP. Partially adapted one-time pad. Made and tested on OS X El Capitan.
 
 ##How to use:
+Open shell and type one of the following commands.
+
 Generate 255 signs long key:
 ```
 php encdec.php key
