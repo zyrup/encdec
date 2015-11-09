@@ -1,6 +1,5 @@
 # encdec
-Simple cryptography script in PHP.
-Made and tested on OS X El Capitan.
+Simple cryptography script in PHP. Partially adapted one-time pad encryption. Made and tested on OS X El Capitan.
 
 ##How to use:
 Generate 255 signs long key:
