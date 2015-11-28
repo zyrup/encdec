@@ -34,15 +34,14 @@ class Encdec {
 
 	public static function init () {
 		self::$settings = (object) [
-			'keyFile'						=> 'key',
-			'keyDir'						=> '',
-			'dataDir'						=> 'data/',
-			'encDir'						=> 'enc/',
-			'encFile'						=> 'enc',
-			'decDir'						=> 'dec/',
-			'decFile'						=> 'dec',
-			'addMax'						=> 444, // must be higher than any possible sum
-			'defaultKeyLength'	=> 255
+			'keyFile'          => 'key',
+			'keyDir'           => '',
+			'dataDir'          => 'data/',
+			'encDir'           => '',
+			'encFile'          => 'enc',
+			'decDir'           => 'dec/',
+			'addMax'           => 444, // must be higher than any possible sum
+			'defaultKeyLength' => 255
 		];
 	}
 
@@ -163,11 +162,7 @@ class Encdec {
 		$encryptedString = self::encrypt($files, $key);
 
 		// save file local
-		$pathName = self::$settings->encDir;
-		if (!file_exists($pathName)) {
-			die("Path $pathName does not exist\n");
-		}
-		$pathName = $pathName.self::$settings->encFile;
+		$pathName = self::$settings->encDir.self::$settings->encFile;
 		self::saveFile($pathName, $encryptedString);
 
 		echo "File saved as $pathName\n";
@@ -184,7 +179,7 @@ class Encdec {
 		}
 		$key = file_get_contents($keyPathName);
 		$pathName = self::$settings->decDir;
-		if (!file_exists($pathName)) {
+		if ($pathName != '' || !file_exists($pathName)) {
 			die("Path $pathName does not exist\n");
 		}
 
