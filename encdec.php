@@ -179,7 +179,7 @@ class Encdec {
 		}
 		$key = file_get_contents($keyPathName);
 		$pathName = self::$settings->decDir;
-		if ($pathName != '' || !file_exists($pathName)) {
+		if (!file_exists($pathName)) {
 			die("Path $pathName does not exist\n");
 		}
 
