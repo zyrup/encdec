@@ -1,5 +1,5 @@
 # encdec
-Simple cryptography script in PHP. Partially adapted one-time pad. Made and tested on OS X El Capitan.
+Simple cipher-script in PHP. Encrypt and decrypt files and folders with a partially adapted one-time pad cipher-script. Made and tested on OS X El Capitan.
 
 ##How to use:
 Open shell and type one of the following commands.
