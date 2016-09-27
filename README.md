@@ -4,6 +4,10 @@ Simple cipher-script in PHP. Encrypt and decrypt files and folders with a partia
 ##How to use:
 Open shell and type one of the following commands.
 
+Further description:
+```
+php encdec.php help
+```
 Generate 255 signs long key:
 ```
 php encdec.php key
